@@ -1,0 +1,15 @@
+#!/bin/sh
+chmod 667 /usr/share/applications/AnonymusRecorder.desktop
+
+/usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=string /apps/ControlPanel/AnonymusRecorder/EMail ""
+/usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=int /apps/ControlPanel/AnonymusRecorder/Level 4
+/usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=int /apps/ControlPanel/AnonymusRecorder/Quality 1
+/usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=bool /apps/ControlPanel/AnonymusRecorder/Gps false
+/usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=bool /apps/ControlPanel/AnonymusRecorder/AutoKillEnable false
+/usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=bool /apps/ControlPanel/AnonymusRecorder/AutoRemove false
+/usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=int /apps/ControlPanel/AnonymusRecorder/AutoKill 15
+/usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=int /apps/ControlPanel/AnonymusRecorder/Sample 2
+/usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=int /apps/ControlPanel/AnonymusRecorder/Bitrate 3
+/usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=bool /apps/ControlPanel/AnonymusRecorder/EnableSecurity false
+/usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=string /apps/ControlPanel/AnonymusRecorder/SecurityCode pass
+exit 0

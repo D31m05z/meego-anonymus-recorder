@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<settings>
+  <group title="Notifications">
+      <text key="/apps/ControlPanel/AnonymusRecorder/EMail" title="E-Mail notification" >
+      </text>
+      <selection key="/apps/ControlPanel/AnonymusRecorder/Level" title="Level of anonymity">
+        <option title="1" >1</option>
+        <option title="2" >2</option>
+        <option title="3" >3</option>
+        <option title="4" >4</option>
+    </selection>
+  </group>
+  <group title="Quality">
+  <selection key="/apps/ControlPanel/AnonymusRecorder/Quality" title="Select sound format">
+    <option title="WAV" >1</option>
+    <option title="AAC" >2</option>
+    <option title="FLAC" >3</option>
+    <option title="SPX" >4</option>
+    </selection>
+    <selection key="/apps/ControlPanel/AnonymusRecorder/Sample" title="Select sample rate">
+      <option title="22.05 kHz" >1</option>
+      <option title="44.1 kHz" >2</option>
+      </selection>
+      <selection key="/apps/ControlPanel/AnonymusRecorder/Bitrate" title="Select bitrate">
+        <option title="3200" >1</option>
+        <option title="6400" >2</option>
+        <option title="9600" >3</option>
+        <option title="128000" >4</option>
+        </selection>
+   </group>
+  <group title="Function">
+      <boolean key="/apps/ControlPanel/AnonymusRecorder/AutoRemove" title="Automatic remove tmp files">
+      </boolean>
+     <boolean key="/apps/ControlPanel/AnonymusRecorder/AutoKillEnable" title="Automatic kill">
+     </boolean>
+     <integer key="/apps/ControlPanel/AnonymusRecorder/AutoKill" title="recording stop [minutes]" min="1" max ="100">
+     </integer>
+   </group>
+   <group title="Security">
+      <boolean key="/apps/ControlPanel/AnonymusRecorder/EnableSecurity" title="Security compress">
+      </boolean>
+      <text key="/apps/ControlPanel/AnonymusRecorder/SecurityCode" title="Password for anonym data" >
+      </text>
+    </group>
+</settings>
