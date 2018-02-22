@@ -103,9 +103,6 @@ void AnonymusRecorder::clean()
     if(m_file)
         delete m_file;
 
-    if(m_audiosource)
-        delete m_audiosource;
-
     if(m_audioSettings)
         delete m_audioSettings;
 
@@ -124,12 +121,15 @@ void AnonymusRecorder::clean()
     if(m_camera)
         delete m_camera;
 
+    if(m_audiosource)
+        delete m_audiosource;
+
     std::cout << "clean finished" << std::endl;
 }
 
 void AnonymusRecorder::stopService()
 {
-    std::cout << "stopRecording" << std::endl;
+    std::cout << "stopService" << std::endl;
     m_audioInput->stop();
 
     if(m_codec == "wav") {
@@ -144,11 +144,12 @@ void AnonymusRecorder::stopService()
         std::cout << "STOP VIDEO RECORDING" << std::endl;
         m_mediaRecorder->stop();
     }
+    std::cout << "stopService finished" << std::endl;
 }
 
 void AnonymusRecorder::killService()
 {
-    std::cout << "shut down service" << std::endl;
+    std::cout << "killService" << std::endl;
     stopService();
 
     std::cout << "start stop service" << std::endl;
@@ -162,9 +163,8 @@ void AnonymusRecorder::killService()
 
     std::cout << "ANONYM EXITING..." << std::endl;
 
-    //TODO: clean
-    //clean();
-    //destroyed();
+    clean();
+    destroyed();
 
     exit(0);
 }

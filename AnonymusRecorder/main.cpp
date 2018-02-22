@@ -132,16 +132,16 @@ int main(int argc, char *argv[])
         notification.publish();
     }
 
-    AnonymusRecorder recorder(0);
-    recorder.start(codec, samplerate, bitrates, gps,enableCamera);
+    recorder = new AnonymusRecorder(0);
+    recorder->start(codec, samplerate, bitrates, gps,enableCamera);
 
     if(autoKill) {
         std::cout << "AUTO KILL ENABLED : " <<autoKillTimer<< std::endl;
-        QTimer::singleShot(autoKillTimer * 60000, &recorder, SLOT(killService()));
+        QTimer::singleShot(autoKillTimer * 60000, recorder, SLOT(killService()));
     }
 
     if(enableVibrate) {
-        recorder.vibrate();
+        recorder->vibrate();
     }
 
     std::cout << "start service" << std::endl;
