@@ -6,13 +6,12 @@
 
 TARGET = ServiceProgress
 
-CONFIG += meegotouch link_pkgconfig
+CONFIG += mobility meegotouch link_pkgconfig
 PKGCONFIG += gq-gconf
 
 TEMPLATE = app
 
 MOBILITY = multimedia feedback messaging
-CONFIG += mobility
 
 QT     += gui network
 

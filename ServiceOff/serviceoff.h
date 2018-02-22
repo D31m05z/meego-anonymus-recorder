@@ -41,6 +41,8 @@ public:
     ServiceOff();
     void vibrate();
     void effectStateChanged();
+private:
+    QFeedbackHapticsEffect* m_rumble;
 };
 
 #endif // SERVICEOFF_H

@@ -27,7 +27,14 @@
 
 ServiceOff::ServiceOff()
 {
-
+    m_rumble = new QFeedbackHapticsEffect();
+    m_rumble->setAttackIntensity(0.0);
+    m_rumble->setAttackTime(100);
+    m_rumble->setIntensity(0.6);
+    m_rumble->setDuration(300);
+    m_rumble->setFadeTime(100);
+    m_rumble->setFadeIntensity(0.+0);
+    connect(m_rumble, SIGNAL(stateChanged()), this, SLOT(effectStateChanged()));
 }
 
 void ServiceOff::effectStateChanged()
@@ -45,16 +52,6 @@ void ServiceOff::effectStateChanged()
 
 void ServiceOff::vibrate()
 {
-    std::cout << "rezgek"<< std::endl;
-    QFeedbackHapticsEffect *rumble = new QFeedbackHapticsEffect();
-    rumble->setAttackIntensity(0.0);
-    rumble->setAttackTime(100);
-    rumble->setIntensity(0.6);
-    rumble->setDuration(300);
-    rumble->setFadeTime(100);
-    rumble->setFadeIntensity(0.+0);
-
-    rumble->start();
-
-    connect(rumble, SIGNAL(stateChanged()), this, SLOT(effectStateChanged()));
+    std::cout << "vibrate"<< std::endl;
+    m_rumble->start();
 }

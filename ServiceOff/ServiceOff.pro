@@ -6,12 +6,9 @@
 
 TARGET = ServiceOff
 
-CONFIG += meegotouch link_pkgconfig
+CONFIG += meegotouch mobility link_pkgconfig
 PKGCONFIG += gq-gconf
-
 MOBILITY = multimedia feedback messaging
-CONFIG += mobility
-
 QT     += gui network
 
 TEMPLATE = app

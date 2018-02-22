@@ -43,7 +43,7 @@
 #include <gconfitem.h>
 
 using namespace std;
-void compress(bool security, QString password)
+void compress(bool encrypt, QString password)
 {
     std::cout << "Compressing settings" << std::endl;
 
@@ -65,11 +65,11 @@ void compress(bool security, QString password)
 
     system(command.toStdString().c_str());
 
-    if(security) {
+    if(encrypt) {
         //echo password | gpg --batch -q -o /tmp/file.tgz --passphrase-fd 0 --decrypt /tmp/file.tgz.gpg
         //echo password | gpg --batch -q --passphrase-fd 0 --cipher-algo AES256 -c /tmp/file.tgz
 
-        std::cout << "security settings" << std::endl;
+        std::cout << "encrypt settings" << std::endl;
 
         command = "echo " + password +" | gpg --batch -q --passphrase-fd 0 -c " + "/home/user/MyDocs/AnonymRecorder/data.tar.bz2";
 
@@ -80,7 +80,7 @@ void compress(bool security, QString password)
     file.close();
 }
 
-void deleteTmpFiles(bool security)
+void deleteTmpFiles(bool encrypt)
 {
     std::cout << "deleteTmpFiles" << std::endl;
 
@@ -97,7 +97,7 @@ void deleteTmpFiles(bool security)
     }
     system(command.toStdString().c_str());
 
-    if(security) {
+    if(encrypt) {
         system("rm /home/user/MyDocs/AnonymRecorder/data.tar.bz2");
     }
 
@@ -114,25 +114,25 @@ int main(int argc, char *argv[])
     bool enableVibrate = false;
     bool enableStandBy = false;
 
-    GConfItem*  config = new GConfItem("/apps/ControlPanel/AnonymusRecorder/Level");
-    std::cout << config->value().toString().toStdString() << std::endl;
-    int level = config->value().toInt();
+    GConfItem  config_level("/apps/ControlPanel/AnonymusRecorder/Level");
+    std::cout << config_level.value().toString().toStdString() << std::endl;
+    int level = config_level.value().toInt();
 
-    config = new GConfItem("/apps/ControlPanel/AnonymusRecorder/EMail");
-    std::cout << config->value().toString().toStdString() << std::endl;
-    QString mail_addres = config->value().toString();
+    GConfItem config_mail("/apps/ControlPanel/AnonymusRecorder/EMail");
+    std::cout << config_mail.value().toString().toStdString() << std::endl;
+    QString mail_addres = config_mail.value().toString();
 
-    config = new GConfItem("/apps/ControlPanel/AnonymusRecorder/EnableSecurity");
-    std::cout << config->value().toString().toStdString() << std::endl;
-    bool enableSecurity = config->value().toInt();
+    GConfItem config_encrypt("/apps/ControlPanel/AnonymusRecorder/EnableSecurity");
+    std::cout << config_encrypt.value().toString().toStdString() << std::endl;
+    bool enableEncrypt = config_encrypt.value().toInt();
 
-    config = new GConfItem("/apps/ControlPanel/AnonymusRecorder/SecurityCode");
-    std::cout << config->value().toString().toStdString() << std::endl;
-    QString password = config->value().toString();
+    GConfItem config_password("/apps/ControlPanel/AnonymusRecorder/SecurityCode");
+    std::cout << config_password.value().toString().toStdString() << std::endl;
+    QString password = config_password.value().toString();
 
-    config = new GConfItem("/apps/ControlPanel/AnonymusRecorder/AutoRemove");
-    std::cout << config->value().toString().toStdString() << std::endl;
-    bool enableAutoRemove = config->value().toInt();
+    GConfItem config_autoremove("/apps/ControlPanel/AnonymusRecorder/AutoRemove");
+    std::cout << config_autoremove.value().toString().toStdString() << std::endl;
+    bool enableAutoRemove = config_autoremove.value().toInt();
 
     if(level == 1) {
         enableNotify = false;
@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
         std::cout << "data.tar.bz2.gpg" << std::endl;
         system("rm /home/user/MyDocs/AnonymRecorder/data.tar.bz2.gpg");
 
-        compress(enableSecurity, password);
+        compress(enableEncrypt, password);
 
 #ifdef HAS_MAIL_SERVICE
         result = sendMail(mail_addres, enableSecurity);
@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
         // it will remove all temporaly files
         if(enableAutoRemove) {
             if(result) {
-                deleteTmpFiles(enableSecurity);
+                deleteTmpFiles(enableEncrypt);
             }
         }
     }

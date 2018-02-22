@@ -53,6 +53,6 @@ int main(int argc, char *argv[])
 
     ServiceOff service;
     service.vibrate();
-    return 0;
-    //app->exec();
+
+    app->exec();
 }

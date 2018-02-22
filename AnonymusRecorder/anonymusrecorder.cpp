@@ -166,7 +166,7 @@ void AnonymusRecorder::killService()
     clean();
     destroyed();
 
-    exit(0);
+    QApplication::exit();
 }
 
 void AnonymusRecorder::start(int encoding, int samplerate, int bitrates, bool gps, bool enableCamera )

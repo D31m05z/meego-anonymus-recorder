@@ -1,10 +1,7 @@
 
 MOBILITY = multimedia feedback messaging location
-CONFIG += mobility
-CONFIG += console
+CONFIG += console mobility meegotouch link_pkgconfig
 QT     += core gui
-
-CONFIG += meegotouch link_pkgconfig
 PKGCONFIG += gq-gconf
 
 INCLUDEPATH += messaging
