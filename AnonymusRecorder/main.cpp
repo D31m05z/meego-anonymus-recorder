@@ -62,18 +62,19 @@ int main(int argc, char *argv[])
     bool enableNotify = false;
     bool enableVibrate = false;
 
-    GConfItem*  config = new GConfItem("/apps/ControlPanel/AnonymusRecorder/Level");
-    std::cout << config->value().toString().toStdString() << std::endl;
-    int level = config->value().toInt();
+    GConfItem config_level("/apps/ControlPanel/AnonymusRecorder/Level");
+    std::cout << config_level.value().toString().toStdString() << std::endl;
+    int level = config_level.value().toInt();
 
-    config = new GConfItem("/apps/ControlPanel/AnonymusRecorder/AutoKillEnable");
-    std::cout << config->value().toString().toStdString() << std::endl;
-    bool autoKill = config->value().toInt();
+    GConfItem config_autokill("/apps/ControlPanel/AnonymusRecorder/AutoKillEnable");
+    std::cout << config_autokill.value().toString().toStdString() << std::endl;
+    bool autoKill = config_autokill.value().toInt();
 
-    config = new GConfItem("/apps/ControlPanel/AnonymusRecorder/AutoKill");
-    std::cout << config->value().toString().toStdString() << std::endl;
-    int autoKillTimer = config->value().toInt();
+    GConfItem config_autokill_time("/apps/ControlPanel/AnonymusRecorder/AutoKill");
+    std::cout << config_autokill_time.value().toString().toStdString() << std::endl;
+    int autoKillTimer = config_autokill_time.value().toInt();
 
+    std::cout << "level = " << level << std::endl;
     if(level == 1) {
         enableNotify = false;
         enableVibrate = false;
@@ -95,30 +96,29 @@ int main(int argc, char *argv[])
         // system("/sbin/initctl restart xsession/sysuid");
     }
 
-    config = new GConfItem("/apps/ControlPanel/AnonymusRecorder/Quality");
-    std::cout << config->value().toString().toStdString() << std::endl;
-    int codec = config->value().toInt();
+    GConfItem config_codec("/apps/ControlPanel/AnonymusRecorder/Quality");
+    std::cout << config_codec.value().toString().toStdString() << std::endl;
+    int codec = config_codec.value().toInt();
 
-    config = new GConfItem("/apps/ControlPanel/AnonymusRecorder/Sample");
-    std::cout << config->value().toString().toStdString() << std::endl;
-    int samplerate = config->value().toInt();
+    GConfItem config_samplerate("/apps/ControlPanel/AnonymusRecorder/Sample");
+    std::cout << config_samplerate.value().toString().toStdString() << std::endl;
+    int samplerate = config_samplerate.value().toInt();
 
-    config = new GConfItem("/apps/ControlPanel/AnonymusRecorder/Bitrate");
-    std::cout << config->value().toString().toStdString() << std::endl;
-    int bitrates = config->value().toInt();
-
-    /// TODO
-    /* config = new GConfItem("/apps/ControlPanel/AnonymusRecorder/Gps");
-    std::cout << config->value().toString().toStdString() << std::endl;*/
-    bool gps = false;//config->value().toInt();
+    GConfItem config_bitrates("/apps/ControlPanel/AnonymusRecorder/Bitrate");
+    std::cout << config_bitrates.value().toString().toStdString() << std::endl;
+    int bitrates = config_bitrates.value().toInt();
 
     /// TODO
-    // config = new GConfItem("/apps/ControlPanel/AnonymusRecorder/Video");
-    // std::cout << config->value().toString().toStdString() << std::endl;
-    bool enableCamera = false; //config->value().toInt();
+    /* GConfItem config_gps("/apps/ControlPanel/AnonymusRecorder/Gps");
+    std::cout << config_gps.value().toString().toStdString() << std::endl;*/
+    bool gps = false;//config_gps.value().toInt();
+
+    /// TODO
+    // GConfItem config_video("/apps/ControlPanel/AnonymusRecorder/Video");
+    // std::cout << config_video.value().toString().toStdString() << std::endl;
+    bool enableCamera = false; //config_video.value().toInt();
 
     if(enableNotify) {
-        //---------------- notify -----------------
         MComponentData::createInstance(argc, argv);
         QString msg;
         if(autoKill)
@@ -130,19 +130,19 @@ int main(int argc, char *argv[])
 
         notification.setImage("icon-m-user-guide");
         notification.publish();
-        //-----------------------------------------
     }
 
-    recorder = new AnonymusRecorder(0);
-    recorder->start(codec, samplerate, bitrates, gps,enableCamera);
+    AnonymusRecorder recorder(0);
+    recorder.start(codec, samplerate, bitrates, gps,enableCamera);
 
     if(autoKill) {
         std::cout << "AUTO KILL ENABLED : " <<autoKillTimer<< std::endl;
-        QTimer::singleShot(autoKillTimer * 60000, recorder, SLOT(killService()));
+        QTimer::singleShot(autoKillTimer * 60000, &recorder, SLOT(killService()));
     }
 
-    if(enableVibrate)
-        recorder->vibrate();
+    if(enableVibrate) {
+        recorder.vibrate();
+    }
 
     std::cout << "start service" << std::endl;
     signal(SIGTERM, term);

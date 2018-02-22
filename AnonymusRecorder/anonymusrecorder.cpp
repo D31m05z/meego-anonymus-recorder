@@ -24,7 +24,6 @@
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "anonymusrecorder.h"
-#include <qmessagestore.h>
 #include <qaudiocapturesource.h>
 #include <iostream>
 #include <QDebug>
@@ -33,29 +32,23 @@
 
 #include<stdlib.h>
 
-/*
-you can decompress the data by entering the password
-decompress an encrypted file
-wrong password
-*/
-
 using namespace std;
 
 AnonymusRecorder::AnonymusRecorder(QObject *parent)
     : QObject(parent)
+    , m_saveFolder("AnonymRecorder/")
+    , m_audioInput(0)
+    , m_file(0)
+    , m_audiosource(0)
+    , m_audioSettings(0)
+    , m_capture(0)
+    , m_input(0)
+    , m_rumble(0)
+    , m_source(0)
+    , m_camera(0)
+    , m_mediaRecorder(0)
+    , m_imageCapture(0)
 {
-    m_audioInput = 0;
-    m_file = 0;
-    m_audiosource = 0;
-    m_audioSettings = 0;
-    m_capture = 0;
-    m_input = 0;
-    m_rumble = 0;
-    m_mediaRecorder = 0;
-    m_camera = 0;
-
-    m_saveFolder = "AnonymRecorder/";
-
     std::cout << "Set the root direction > MyDocs"+m_saveFolder.toStdString() << std::endl;
     QDir dir(QDir::homePath() + QString("/MyDocs/"+m_saveFolder) );
 
@@ -65,26 +58,32 @@ AnonymusRecorder::AnonymusRecorder(QObject *parent)
     }
 
     std::cout << "FORMAT" << std::endl;
-    QAudioFormat m_format;
-
-    m_format.setChannels(1);
-    m_format.setSampleSize(16);
-    m_format.setSampleType(QAudioFormat::SignedInt);
-    m_format.setByteOrder(QAudioFormat::LittleEndian);
-    m_format.setCodec("audio/pcm");
+    QAudioFormat format;
+    format.setChannels(1);
+    format.setSampleSize(16);
+    format.setSampleType(QAudioFormat::SignedInt);
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setCodec("audio/pcm");
+    m_format = format;
 
     QAudioDeviceInfo info(QAudioDeviceInfo::defaultInputDevice());
-    if (!info.isFormatSupported(m_format)) {
+    if (!info.isFormatSupported(format)) {
         std::cout << "Default format not supported - trying to use nearest" << std::endl;
-        m_format = info.nearestFormat(m_format);
+        m_format = info.nearestFormat(format);
     }
 
     m_audioInput = new QAudioInput(QAudioDeviceInfo::defaultInputDevice(), m_format);
-
-    //------------
     m_audiosource = new QAudioCaptureSource();
     m_capture = new QMediaRecorder(m_audiosource);
     m_audioSettings = new QAudioEncoderSettings();
+
+    m_rumble = new QFeedbackHapticsEffect();
+    m_rumble->setAttackIntensity(0.0);
+    m_rumble->setAttackTime(100);
+    m_rumble->setIntensity(0.6);
+    m_rumble->setDuration(300);
+    m_rumble->setFadeTime(100);
+    m_rumble->setFadeIntensity(0.+0);
 }
 
 AnonymusRecorder::~AnonymusRecorder()
@@ -96,6 +95,8 @@ AnonymusRecorder::~AnonymusRecorder()
 
 void AnonymusRecorder::clean()
 {
+    std::cout << "clean" << std::endl;
+
     if(m_audioInput)
         delete m_audioInput;
 
@@ -114,14 +115,16 @@ void AnonymusRecorder::clean()
     if(m_input)
         delete m_input;
 
-    // if(rumble)
-    //     delete rumble;
+    if(m_rumble)
+        delete m_rumble;
 
     if(m_mediaRecorder)
         delete m_mediaRecorder;
 
     if(m_camera)
         delete m_camera;
+
+    std::cout << "clean finished" << std::endl;
 }
 
 void AnonymusRecorder::stopService()
@@ -151,17 +154,11 @@ void AnonymusRecorder::killService()
     std::cout << "start stop service" << std::endl;
     QProcess process;
     process.execute("/opt/AnonymusRecorder/base/ServiceOff");
+
     std::cout << "started stop service" << std::endl;
     std::cout << "ICON UPDATE" << std::endl;
 
     system("cat /opt/AnonymusRecorder/base/off.desktop >/usr/share/applications/AnonymusRecorder.desktop");
-
-    //QProcess *p = new QProcess(this);
-    //p->addArgument("");
-    //p->addArgument("somefile.txt");
-    //p.start();
-
-    //process.start("cat",QStringList("/opt/AnonymusRecorder/base/off.desktop >/usr/share/applications/AnonymusRecorder.desktop"));
 
     std::cout << "ANONYM EXITING..." << std::endl;
 
@@ -178,23 +175,23 @@ void AnonymusRecorder::start(int encoding, int samplerate, int bitrates, bool gp
 
     switch(encoding) {
     case 1:
-        m_codec="wav";
-        m_container=".wav";
+        m_codec = "wav";
+        m_container = ".wav";
         std::cout << "WAV" << std::endl;
         break;
     case 2:
-        m_codec="audio/AAC";
-        m_container=".aac";
+        m_codec = "audio/AAC";
+        m_container = ".aac";
         std::cout << "AAC" << std::endl;
         break;
     case 3:
-        m_codec="audio/FLAC";
-        m_container=".flac";
+        m_codec = "audio/FLAC";
+        m_container = ".flac";
         std::cout << "FLAC" << std::endl;
         break;
     case 4:
-        m_codec="audio/speex";
-        m_container=".spx";
+        m_codec = "audio/speex";
+        m_container = ".spx";
         std::cout << "SPX" << std::endl;
         break;
     }
@@ -202,42 +199,40 @@ void AnonymusRecorder::start(int encoding, int samplerate, int bitrates, bool gp
     switch(samplerate) {
     case 1:
         std::cout << "22050" << std::endl;
-        m_sampleRate=22050;
+        m_sampleRate = 22050;
         break;
     case 2:
         std::cout << "44100" << std::endl;
-        m_sampleRate=44100;
+        m_sampleRate = 44100;
         break;
     }
 
     switch(bitrates) {
     case 1:
         std::cout << "32000" << std::endl;
-        m_bitRate=32000;
+        m_bitRate = 32000;
         break;
     case 2:
         std::cout << "64000" << std::endl;
-        m_bitRate=64000;
+        m_bitRate = 64000;
         break;
     case 3:
         std::cout << "96000" << std::endl;
-        m_bitRate=96000;
+        m_bitRate = 96000;
         break;
     case 4:
         std::cout << "128000" << std::endl;
-        m_bitRate=128000;
+        m_bitRate = 128000;
         break;
     }
 
     QUrl recordFileUrl = generateAudioFilePath();
     QString name = recordFileUrl.toString();
 
-    //-------------------------------------------------------------
     QFile file("/home/user/MyDocs/AnonymRecorder/stat.txt");
     file.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream out(&file);
     out << name + "*";
-    //--------------------------------------------------------------
 
     if(m_codec == "wav") {
         // Starts the recording
@@ -277,97 +272,31 @@ void AnonymusRecorder::start(int encoding, int samplerate, int bitrates, bool gp
         // out << name + ".txt" << " ";
     }
 
-    /*
-    QGraphicsVideoItem *myViewfinder = new QGraphicsVideoItem(this);
-
-    QCamera* myCamera = new QCamera(frontCamera);
-
-    myCamera->setViewfinder(myViewfinder);
-    myCamera->start();
-*/
-
     if(enableCamera) {
-        /* QByteArray frontCamera = QCamera::availableDevices()[1];
-        camera = new QCamera(frontCamera);
-        mediaRecorder = new QMediaRecorder(camera);
-
-        mediaRecorder->setOutputLocation(name+".avi");
-        camera->setCaptureMode(QCamera::CaptureVideo);
-        camera->start();
-
-        std::cout << "ERRORS: " << camera->errorString().toStdString() << std::endl;
-        */
-
-        //out << name + ".avi" << " ";
-
-        /*
-        std::cout << "Video recording to" << mediaRecorder->outputLocation().toString().toStdString() << std::endl;
-
-        //on shutter button pressed
-        mediaRecorder->record();*/
-
-        //  QByteArray cameraDevices = QCamera::availableDevices()[0];
-        //     camera = new QCamera("secondary");
-
-        /*
-        camera = new QCamera;
-        //QCameraViewfinder* viewFinder = new QCameraViewfinder;
-        //camera->setViewfinder(viewFinder);
-       // viewFinder->show();
-
-        imageCapture = new QCameraImageCapture(camera);
-        connect(imageCapture, SIGNAL(imageCaptured(QString,QImage)), this, SLOT(imageCaptured(QString,QImage)));
-
-        camera->setCaptureMode(QCamera::CaptureStillImage);
-        camera->start();
-
-        //on half pressed shutter button
-        camera->searchAndLock();
-
-        //on shutter button pressed
-        imageCapture->capture();
-
-        //on shutter button released
-        camera->unlock();
-        */
-
-        /*
-        camera = new QCamera("primary");
-       //   camera->setViewfinder(ui->viewFinder);
-          imageCapture = new QCameraImageCapture(camera);
-          QImageEncoderSettings encoder_setting = imageCapture->encodingSettings();
-          encoder_setting.setCodec("image/jpeg");
-          encoder_setting.setQuality(QtMultimediaKit::NormalQuality);
-          encoder_setting.setResolution(800,600);
-          imageCapture->setEncodingSettings(encoder_setting);
-          connect(imageCapture, SIGNAL(imageSaved(int,QString)), this, SLOT(processSavedImage(int,QString)));
-
-          imageCapture->capture("/home/user/MyDocs/img.jpg");
-        */
+        // TODO
     }
     file.close();
 }
 
 void AnonymusRecorder::processSavedImage(int requestId, QString str)
 {
-    QImage my_image(str);
-    cout<<"BAAAAAAAAAAAAAAAFDGDFGDFGD"<<endl;
+    std::cout << "processSavedImage: " << requestId << "str: " << str.toStdString() << endl;
 }
 
 void AnonymusRecorder::captureImage()
 {
-    cout<<"captureImage!!!!!!!"<<endl;
+    std::cout << "captureImage" << std::endl;
     if (m_imageCapture->isReadyForCapture()) {
-        cout<<"isReadyForCapture!!!!!!!"<<endl;
+        std::cout << "isReadyForCapture" << std::endl;
         m_imageCapture->capture(QString("/home/user/MyDocs/camera_capture.jpg"));
     } else {
-        cout<<"ERROR!!!!!!!"<<endl;
+        std::cout << "ERROR: camera is not ready for capture" << std::endl;
     }
 
 }
-void AnonymusRecorder::imageCaptured(const QString &fileName, const QImage &preview)
+void AnonymusRecorder::imageCaptured(const QString &fileName, const QImage & /*preview*/)
 {
-    cout<<"imageCaptured!!!!!!!"<<endl;
+    std::cout << "imageCaptured: " <<  fileName.toStdString() << std::endl;
 }
 
 QUrl AnonymusRecorder::generateAudioFilePath()
@@ -383,10 +312,10 @@ QUrl AnonymusRecorder::generateAudioFilePath()
 
     int lastImage = 0;
     int fileCount = 0;
+
     foreach(QString fileName, outputDir.entryList(QStringList() << "*")) {
         if (outputDir.exists(fileName)){
             std::cout << "$EXIST$ !!! :" << fileName.toStdString() << std::endl;
-
             fileCount += 1;
             std::cout << "fileCount :" << fileCount << std::endl;
         }
@@ -422,14 +351,6 @@ QUrl AnonymusRecorder::generateAudioFilePath()
 
 void AnonymusRecorder::vibrate()
 {
-    std::cout << "rezgek" << std::endl;
-
-    m_rumble = new QFeedbackHapticsEffect();
-    m_rumble->setAttackIntensity(0.0);
-    m_rumble->setAttackTime(100);
-    m_rumble->setIntensity(0.6);
-    m_rumble->setDuration(300);
-    m_rumble->setFadeTime(100);
-    m_rumble->setFadeIntensity(0.+0);
+    std::cout << "vibrate" << std::endl;
     m_rumble->start();
 }

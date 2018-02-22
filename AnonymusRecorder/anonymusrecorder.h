@@ -26,23 +26,21 @@
 #ifndef ANONYMUSRECORDER_H
 #define ANONYMUSRECORDER_H
 
-#include "wav.h"
-
 #include <QtGui/QApplication>
 #include <QDir>
 #include <QDebug>
-
 #include <QUrl>
 #include <QDateTime>
 #include <QFeedbackHapticsEffect>
 #include <QObject>
 #include <QSocketNotifier>
 #include <QCamera>
-
-#include <qmediarecorder.h>
-#include <qaudioinput.h>
-#include "logGPS.h"
 #include <QCameraImageCapture>
+#include <QMediaRecorder>
+#include <QAudioInput>
+
+#include "logGPS.h"
+#include "wav.h"
 
 using namespace QtMobility;
 class QAudioCaptureSource;
@@ -63,7 +61,6 @@ private:
 
 public slots:
     void killService();
-
     void captureImage();
     void imageCaptured(const QString &fileName, const QImage &preview);
     void processSavedImage(int requestId, QString str);
